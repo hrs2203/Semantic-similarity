@@ -1,0 +1,4 @@
+{
+    "python.pythonPath": "~/miniconda3/envs/sent-sim/python",
+    "python.formatting.provider": "autopep8"
+}
