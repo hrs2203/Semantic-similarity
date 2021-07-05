@@ -1,15 +1,11 @@
-# ------------------------------------------------------
-#   Authored by : Sriharsha Hatwar
-#   Research Paper : Sentence Similarity Based on Semantic Nets and corpus statistics
-#   NLP - Assignment 2
-#   PES University
-# ------------------------------------------------------
 from nltk import word_tokenize
 from nltk import sent_tokenize
 from nltk.corpus import wordnet as wn
 import numpy as np
 from nltk.corpus import brown
 import math
+
+# ========== CONSTANTS ==========
 CONST_PHI = 0.2
 CONST_BETA = 0.45
 CONST_ALPHA = 0.2
@@ -25,10 +21,6 @@ def proper_synset(word_one, word_two):
     maximum_similarity = -1
     synsets_one = wn.synsets(word_one)
     synsets_two = wn.synsets(word_two)
-    #print("first word :",word_one)
-    #print("second word",word_two)
-    # print(synsets_one)
-    # print(synsets_two)
     if(len(synsets_one) != 0 and len(synsets_two) != 0):
         for synset_one in synsets_one:
             for synset_two in synsets_two:
@@ -90,18 +82,15 @@ def depth_common_subsumer(synset_one, synset_two):
                 if val > height:
                     height = val
 
-    # print(height) #works
     return (math.exp(CONST_BETA * height) - math.exp(-CONST_BETA * height))/(math.exp(CONST_BETA * height) + math.exp(-CONST_BETA * height))
 
 
 def word_similarity(word1, word2):
     # depth_common_subsumer(wn.synset('boy.n.01'),wn.synset('life_form.n.01'))
-    # print(wn.synset('boy.n.01').lowest_common_hypernym(wn.synset('animal.n.01')))
-    # print(wn.synset('boy.n.01').lowest_common_hypernym(wn.synset('girl.n.01')))
-    #word1 = input("Enter the first word: ")
-    #word2 = input("Enter the second word: ")
-    # synset_wordone = wn.synset(word1+".n.01")#doesnt work
-    # synset_wordtwo = wn.synset(word2+".n.01")#doesnt work
+    # word1 = input("Enter the first word: ")
+    # word2 = input("Enter the second word: ")
+    # synset_wordone = wn.synset(word1+".n.01") #doesnt work
+    # synset_wordtwo = wn.synset(word2+".n.01") #doesnt work
     # cant just add +".n.01" to words to convert them to a synset.
     synset_wordone, synset_wordtwo = proper_synset(word1, word2)
     # Need to execute the above as we cant know whether a 'noun' for of the word exists or not.
@@ -139,10 +128,7 @@ def most_similar_word(word, sentence):
 
 def gen_sem_vec(sentence, joint_word_set):
     semantic_vector = np.zeros(len(joint_word_set))
-    # print(semantic_vector)
     i = 0
-    #print("This is sentence :",sentence)
-    #print("This is joint word set:",joint_word_set)
     for joint_word in joint_word_set:
         sim_word = joint_word  # to measure the
         beta_sim_measure = 1
@@ -161,27 +147,19 @@ def gen_sem_vec(sentence, joint_word_set):
 
 
 def sent_sim(sent_set_one, sent_set_two, joint_word_set):
-    #sent_set_one = set(filter(lambda x : not (x == '.' or x == '?') , word_tokenize(sentence_one)))
-    #sent_set_two = set(filter(lambda x : not (x == '.' or x == '?') , word_tokenize(sentence_two)))
-    # print(sent_set_one)
-    # print(sent_set_two)
-    # print(list(sent_set_one.union(sent_set_two)))
-    #joint_word_set = list(sent_set_one.union(sent_set_two))
-    # print(joint_word_set)
-    #sent_set_one = list(sent_set_one)
-    #sent_set_two = list(sent_set_two)
+    # sent_set_one = set(filter(lambda x : not (x == '.' or x == '?') , word_tokenize(sentence_one)))
+    # sent_set_two = set(filter(lambda x : not (x == '.' or x == '?') , word_tokenize(sentence_two)))
+    # joint_word_set = list(sent_set_one.union(sent_set_two))
+    # sent_set_one = list(sent_set_one)
+    # sent_set_two = list(sent_set_two)
     sem_vec_one = gen_sem_vec(sent_set_one, joint_word_set)
     sem_vec_two = gen_sem_vec(sent_set_two, joint_word_set)
     # multiply the two vectors..
-    # print(sem_vec_one)
-    # print(sem_vec_two)
     return np.dot(sem_vec_one, sem_vec_two.T) / (np.linalg.norm(sem_vec_one) * np.linalg.norm(sem_vec_two))
 
 
 def word_order_similarity(sentence_one, sentence_two):
-    #print("Sentence one :",sentence_one)
     token_one = word_tokenize(sentence_one)
-    #print("Sentence two : ",sentence_two)
     token_two = word_tokenize(sentence_two)
     joint_word_set = list(set(token_one).union(set(token_two)))
     r1 = np.zeros(len(joint_word_set))
@@ -192,7 +170,6 @@ def word_order_similarity(sentence_one, sentence_two):
     set_token_one = set(token_one)
     set_token_two = set(token_two)
     i = 0
-    # print(en_joint)
     for word in joint_word_set:
         if word in set_token_one:
             r1[i] = en_joint_one[word]  # so wrong.
@@ -229,15 +206,11 @@ def main(sentence_one, sentence_two):
     sentence_similarity = (CONST_DELTA * sent_sim(sent_set_one, sent_set_two, list(joint_word_set))
                            ) + ((1.0 - CONST_DELTA) * word_order_similarity(sentence_one, sentence_two))
     return sentence_similarity
-#sentence_one = "I play hockey"
-#sentence_two = "who are you?"
-# print(main(sentence_one,sentence_two))\
 
 
 def file_sem(f):
     contents = open(f).read().strip()
     ind_sentences = sent_tokenize(contents)
-    # print(ind_sentences)
     no_of_sentences = len(ind_sentences)
     sent_sim_matr = np.zeros((no_of_sentences, no_of_sentences))
     i = 0
@@ -272,7 +245,6 @@ def intro():
         sent_two = input("Enter the second sentence two :")
         prob_sim_sent = main(sent_one, sent_two)
         print(prob_sim_sent)
-        #print("Similarity between\n"+sent_one+"\n"+sent_two+"\n\n is : ",prob_sim_sent)
     else:
         print("Wrong choice time exceeded!")
         exit()
